@@ -1,0 +1,6 @@
+[submodule "contrib/autocheck"]
+	path = contrib/autocheck
+	url = https://github.com/thejohnfreeman/autocheck.git
+[submodule "contrib/bandit"]
+	path = contrib/bandit
+	url = https://github.com/joakimkarlsson/bandit.git
