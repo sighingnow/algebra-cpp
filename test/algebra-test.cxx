@@ -3,6 +3,7 @@
 #include <autocheck/autocheck.hpp>
 #include <bandit/bandit.h>
 
+
 template <typename A, typename B = A>
 bool add(A const & a, A const & b) {
     return a + b == b + a;
@@ -18,13 +19,12 @@ public:
         this->_correct = true;
         autocheck::report_success(std::clog, tests, max_tests, trivial, std::move(dist));
     }
-
     virtual void failure(size_t tests, const char* reason) const {
-        std::ostringstream out;
+        std::ostream & out = std::cout;
         this->_correct = false; // const_cast<algebra_reporter *>(this)->_correct = true;
+        out << std::endl; // to separate result of two test cases.
         autocheck::report_failure(out, tests, reason);
     }
-
 // For checking the correctness of autocheck. True value means passing the test.
 private:
     mutable bool _correct;
