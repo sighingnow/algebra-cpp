@@ -30,15 +30,15 @@ include_directories(
 )
 
 ## All demos.
-add_executable(helloworld
-    demo/helloworld.cxx
+add_executable(hello-algebra
+    demo/hello-algebra.cxx
 )
 
 ## Unit tests.
-add_executable(helloworld_test
-    test/helloworld_test.cxx
+add_executable(algebra-test
+    test/algebra-test.cxx
 )
-add_test(helloworld_test helloworld_test)
+add_test(algebra-test algebra-test)
 
 ## Add "--output-on-failure" via custom target.
 if (CMAKE_CONFIGURATION_TYPES)
