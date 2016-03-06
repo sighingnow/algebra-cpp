@@ -2,7 +2,7 @@
 
 #include <autocheck/autocheck.hpp>
 #include <bandit/bandit.h>
-#include "ftl_reporter.h"
+#include "algebra_reporter.h"
 
 template <typename A, typename B = A>
 bool add(A const & a, A const & b) {
@@ -10,7 +10,7 @@ bool add(A const & a, A const & b) {
 }
 
 go_bandit([](){
-    ftl_reporter reporter;
+    algebra_reporter reporter;
     bandit::describe("Hello world:", [&](){
         bandit::before_each([&](){
 
@@ -25,5 +25,5 @@ go_bandit([](){
 
 int main(int argc, char* argv[])
 {
-  return bandit::run(argc, argv);
+    return bandit::run(argc, argv);
 }

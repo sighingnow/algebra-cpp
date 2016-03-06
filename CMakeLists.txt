@@ -1,40 +1,42 @@
 ## CMake script for libftl.
 
-PROJECT(libftl)
+PROJECT(algebra.h)
 
 ## Global configurations.
 cmake_minimum_required(VERSION 3.2)
 enable_testing()
-set(CMAKE_VERBOSE_MAKEFILE off)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(BUILD_STATIC_EXECUTABLE OFF)
 
 ## Set up compiler and options.
-set(CMAKE_CXX_COMPILER clang++)
+## set(CMAKE_CXX_COMPILER g++)
 add_compile_options(
     -Wall
-    ## -Wextra
-    ## -Werror
-    -std=c++14
-    -O1
+    -O2
+    -std=c++17
+    -pedantic-errors
 )
+
+## static link standrd C++ library.
+if(BUILD_STATIC_EXECUTABLE)
+    SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+endif()
 
 ## C++ header files.
 include_directories(
     include/
-    contrib/autocheck/include/
-    contrib/bandit/
+    third_party/autocheck/include/
+    third_party/bandit/
 )
 
-## Common source files.
-set(COMMON)
-
-## Executables
+## All demos.
 add_executable(helloworld
-    ${COMMON} app/helloworld.cpp
+    demo/helloworld.cxx
 )
 
 ## Unit tests.
 add_executable(helloworld_test
-    ${COMMON} test/helloworld_test.cpp
+    test/helloworld_test.cxx
 )
 add_test(helloworld_test helloworld_test)
 

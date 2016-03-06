@@ -1,6 +1,6 @@
-[submodule "contrib/autocheck"]
-	path = contrib/autocheck
+[submodule "third_party/autocheck"]
+	path = third_party/autocheck
 	url = https://github.com/thejohnfreeman/autocheck.git
-[submodule "contrib/bandit"]
-	path = contrib/bandit
+[submodule "third_party/bandit"]
+	path = third_party/bandit
 	url = https://github.com/joakimkarlsson/bandit.git

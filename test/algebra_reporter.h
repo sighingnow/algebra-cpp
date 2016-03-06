@@ -6,7 +6,7 @@
 
 #include <autocheck/autocheck.hpp>
 
-class ftl_reporter : public autocheck::reporter {
+class algebra_reporter : public autocheck::reporter {
 public:
     virtual void success(size_t tests, size_t max_tests,
         size_t trivial, autocheck::distribution && dist) const {
