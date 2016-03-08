@@ -110,6 +110,12 @@ namespace algebra {
             return value;
         }
     };
+
+    /**
+     * Custom type concepts checker.
+     */
+    template<bool Pred>
+    using Requires = typename std::enable_if<Pred>::type;
 }
 
 #endif /* __ALGEBRA_BASIC_TYPE_CONCEPTS_HH__ */
