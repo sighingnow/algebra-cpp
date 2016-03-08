@@ -32,13 +32,14 @@ include_directories(
 ## All demos.
 add_executable(hello-algebra
     demo/hello-algebra.cxx
+    demo/monoid-demo.cxx
 )
 
 ## Unit tests.
-add_executable(algebra-test
-    test/algebra-test.cxx
-)
+add_executable(algebra-test test/algebra-test.cxx)
 add_test(algebra-test algebra-test)
+add_executable(monoid-test test/monoid-test.cxx)
+add_test(monoid-test monoid-test)
 
 ## Add "--output-on-failure" via custom target.
 if (CMAKE_CONFIGURATION_TYPES)
