@@ -6,11 +6,9 @@
 #define __ALGEBRA_H__
 
 /**
+ * Header for this library.
  */
-namespace algebra {
 
-};
+namespace algebra {};
 
 #endif /* __ALGEBRA_H__ */
-
-
