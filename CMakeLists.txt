@@ -1,5 +1,3 @@
-## CMake script for libftl.
-
 PROJECT(algebra.h)
 
 ## Global configurations.
@@ -50,4 +48,3 @@ else()
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
         --force-new-ctest-process --output-on-failure)
 endif()
-
