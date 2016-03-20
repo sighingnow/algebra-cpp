@@ -5,6 +5,8 @@
 #ifndef __ALGEBRA_CONTROL_MONAD_HPP__
 #define __ALGEBRA_CONTROL_MONAD_HPP__
 
+#include "../prelude.hpp"
+#include "../basic/type_concepts.hpp"
 #include "../basic/type_operation.hpp"
 
 namespace algebra {
@@ -65,17 +67,6 @@ struct Monad {
 };
 
 /**
- * Identity functor.
- */
-constexpr struct identity {
-    template <typename T>
-    constexpr auto operator()(T &&t) const noexcept
-            -> decltype(std::forward<T>(t)) {
-        return std::forward<T>(t);
-    }
-} id{};
-
-/**
  * Default definition for `pure`, `bind`, `map` and `join`.
  */
 
@@ -113,8 +104,8 @@ struct default_bind {
 };
 
 // join: monad m => m (m a) => m a.
-// default `join` in haskell:
-//  join x =  x >>= id
+// In haskell:
+//      join x =  x >>= id
 template <typename M>
 struct default_join {
     using T = ValueType<M>;
@@ -123,17 +114,17 @@ struct default_join {
     using _M = Rebind<M, U>;
 
     static constexpr _M<T> join(const _M<_M<T>> &m) {
-        return monad<_M<_M<T>>>::bind(m, id);
+        return monad<_M<_M<T>>>::bind(m, _id);
     }
 
     static constexpr _M<T> join(_M<_M<T>> &&m) {
-        return monad<_M<_M<T>>>::bind(std::move(m), id);
+        return monad<_M<_M<T>>>::bind(std::move(m), _id);
     }
 };
 
 // ap (apply): monad m => m (a -> b) -> m a -> m b.
-// default `ap` in haskell:
-//  ap m1 m2 = do { x1 <- m1; x2 <- m2; return (x1 x2) }
+// In haskell:
+//      ap m1 m2 = do { x1 <- m1; x2 <- m2; return (x1 x2) }
 template <typename M>
 struct default_ap {
     using T = ValueType<M>;
@@ -152,8 +143,8 @@ struct default_ap {
 };
 
 // liftM: monad m => (a -> b) -> m a -> m b.
-// default `liftM` in haskell:
-//  liftM f m1 = do { x1 <- m1; return (f x1) }
+// In haskell:
+//      liftM f m1 = do { x1 <- m1; return (f x1) }
 template <typename M>
 struct default_liftM {
     using T = ValueType<M>;
@@ -186,6 +177,56 @@ struct default_monad : default_pure<M>,
                        default_liftM<M> {
     static constexpr bool instance = true;
 };
+
+/**
+ * Operator overlaoding for monad operation.
+ */
+
+// Use `>>=` to represent `bind`.
+//  a >>= b = bind(a, b).
+
+// for ordinary function and ordinary function pointer.
+template <typename M, typename F, typename _M = PlainType<M>,
+          typename = Requires<Monad<_M>{} &&
+                              !std::is_member_function_pointer<F>::value>>
+auto operator>>=(M &&m, F &&f)
+        -> decltype(monad<_M>::bind(std::move(m), std::forward<F>(f))) {
+    return monad<_M>::bind(std::move(m), std::forward<F>(f));
+}
+
+// for lambda expression.
+template <typename M, typename F, typename _M = PlainType<M>,
+          typename = Requires<Monad<_M>{}>>
+auto operator>>=(M &&m, F (M::*f)() const)
+        -> decltype(monad<M>::bind(std::move(m), std::forward<F>(f))) {
+    return std::move<M>(m) >>= std::mem_fn<F>(f);
+}
+
+// for functor object (callable struct, struct with overloaded `()` operator).
+template <typename M, typename F, typename _M = PlainType<M>,
+          typename = Requires<Monad<_M>{}>>
+auto operator>>=(M &&m, F (M::*f)())
+        -> decltype(monad<M>::bind(std::move(m), std::forward<F>(f))) {
+    return std::move<M>(m) >>= std::mem_fn<F>(f);
+}
+
+// Use `<<=` to represent reverse bind.
+template <typename M, typename F, typename _M = PlainType<M>,
+          typename = Requires<Monad<_M>{}>>
+auto operator<<=(F &&f, M &&m)
+        -> decltype(std::move<M>(m) >>= std::forward<F>(f)) {
+    return std::move<M>(m) >>= std::forward<F>(f);
+}
+
+// Use `>>` to represent the bind with discard the first result. The two monadic
+// compuatation will be all performed.
+template <typename MA, typename MB, typename _MA = PlainType<MA>,
+          typename _MB = PlainType<MB>,
+          typename = Requires<Monad<_MA>{} && Monad<_MB>{}>>
+_MB operator>>(MA &&ma, MB &&mb) {
+    // TODO
+    // return std::forward<MA>(ma) >>= _const(std::forward<MB>(mb));
+}
 }
 
 #endif /* __ALGEBRA_CONTROL_MONAD_HPP__ */
