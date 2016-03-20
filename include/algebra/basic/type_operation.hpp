@@ -5,6 +5,9 @@
 #ifndef __ALGEBRA_TYPE_OPERATION_HH__
 #define __ALGEBRA_TYPE_OPERATION_HH__
 
+#include <type_traits>
+#include <utility>
+
 /**
  * Basic higher-order combinator to manipulate types.
  */
