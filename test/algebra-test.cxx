@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include <autocheck/autocheck.hpp>
 #include <bandit/bandit.h>
+#include <autocheck/autocheck.hpp>
 
-#include "./reporter.hpp"
 #include <algebra/data/monoid.hpp>
+#include "./reporter.hpp"
 
 template <typename A, typename B = A>
 bool add(A const &a, A const &b) {

@@ -2,8 +2,8 @@
  * The MIT License(MIT). Copyright (c) 2015-2016 He Tao
  */
 
-#include <iostream>
 #include <algebra/data/monoid.hpp>
+#include <iostream>
 
 void monoid_demo() {
     std::cout << "Monoid examples------------" << std::endl;
