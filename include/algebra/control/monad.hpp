@@ -5,9 +5,9 @@
 #ifndef __ALGEBRA_CONTROL_MONAD_HPP__
 #define __ALGEBRA_CONTROL_MONAD_HPP__
 
-#include "../prelude.hpp"
 #include "../basic/type_concepts.hpp"
 #include "../basic/type_operation.hpp"
+#include "../prelude.hpp"
 
 namespace algebra {
 
@@ -169,6 +169,7 @@ struct default_liftM {
 /**
  * Default monad with default "pure", "bind", "join", "ap" and "liftM".
  */
+
 template <typename M>
 struct default_monad : default_pure<M>,
                        default_bind<M>,
@@ -223,7 +224,7 @@ auto operator<<=(F &&f, M &&m)
 template <typename MA, typename MB, typename _MA = PlainType<MA>,
           typename _MB = PlainType<MB>,
           typename = Requires<Monad<_MA>{} && Monad<_MB>{}>>
-_MB operator>>(MA &&ma, MB &&mb) {
+_MB operator>>(MA &&, MB &&) {
     // TODO
     // return std::forward<MA>(ma) >>= _const(std::forward<MB>(mb));
 }
