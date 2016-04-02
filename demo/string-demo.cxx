@@ -9,6 +9,6 @@
 void string_demo() {
     std::cout << "String examples------------" << std::endl;
     std::cout << "Length of empty string: "
-              << algebra::monoid<std::string>::mempty() << std::endl;
+              << algebra::monoid<std::string>::mempty().size() << std::endl;
     std::cout << std::endl;
 }

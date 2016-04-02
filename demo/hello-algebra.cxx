@@ -7,12 +7,14 @@
 
 void monoid_demo();
 void string_demo();
+void list_demo();
 
 int main() {
     std::cout << "Hello algebra !" << std::endl;
 
     monoid_demo();
     string_demo();
+    list_demo();
 
     return 0;
 }

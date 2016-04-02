@@ -34,6 +34,7 @@ add_executable(hello-algebra
     demo/hello-algebra.cxx
     demo/monoid-demo.cxx
     demo/string-demo.cxx
+    demo/list-demo.cxx
 )
 
 ## Unit tests.
@@ -43,6 +44,8 @@ add_executable(monoid-test test/monoid-test.cxx)
 add_test(monoid-test monoid-test)
 add_executable(string-test test/string-test.cxx)
 add_test(string-test string-test)
+add_executable(list-test test/list-test.cxx)
+add_test(list-test list-test)
 
 ## Add "--output-on-failure" via custom target.
 if (CMAKE_CONFIGURATION_TYPES)
