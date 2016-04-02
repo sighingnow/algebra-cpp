@@ -38,10 +38,9 @@ void applicative_demo() {
                                           [](int x) { return x + 1; }};
 
     using algebra::operator*;
-    auto r = algebra::applicative<std::list<int>>::ap(
-            fs, std::list<int>{1, 2, 3, 4});
-    // TODO why use the operator `*` will fail ?
-    // auto r = fs * std::list<int>{1, 2, 3, 4};
+    // auto r = algebra::applicative<std::list<int>>::ap(
+    //         fs, std::list<int>{1, 2, 3, 4});
+    auto r = fs * std::list<int>{1, 2, 3, 4};
     std::for_each(std::begin(r), std::end(r),
                   [](int const& n) { std::cout << n << " "; });
     std::cout << std::endl;

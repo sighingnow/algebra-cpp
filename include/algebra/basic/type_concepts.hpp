@@ -121,9 +121,13 @@ template <typename T, typename U>
 struct SameTemplate;
 
 template <template <typename...> class T, template <typename...> class U,
-          typename... Ts, typename... Us>
+          typename... Ts,
+          typename... Us  // Here, `Us` is just a placeholder, indicates that
+                          // `U` is a parameterised
+                          // tempalte.
+          >
 struct SameTemplate<T<Ts...>, U<Us...>> {
-    static constexpr bool value = std::is_same<T<Ts...>, U<Us...>>::value;
+    static constexpr bool value = std::is_same<T<Ts...>, U<Ts...>>::value;
 };
 
 /**

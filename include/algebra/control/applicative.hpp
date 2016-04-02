@@ -120,20 +120,20 @@ struct default_pure {
  */
 
 // Overloading `*` as `ap`.
-template <typename Ff, typename Fn = ValueType<PlainType<Ff>>, typename F,
+template <typename Ff, typename F, typename Fn = PlainType<Ff>,
           typename _F = PlainType<F>,
           typename = Requires<Applicative<_F>::value>,
-          typename = Requires<SameTemplate<PlainType<Fn>, _F>::value>>
+          typename = Requires<SameTemplate<Fn, _F>::value>>
 auto operator*(Ff &&u, F &&v) {
-    return applicative<_F>::apply(std::forward<Ff>(u), std::forward<F>(v));
+    return applicative<_F>::ap(std::forward<Ff>(u), std::forward<F>(v));
 }
 
-template <typename Ff, typename Fn = ValueType<PlainType<Ff>>, typename F,
+template <typename Ff, typename F, typename Fn = PlainType<Ff>,
           typename _F = PlainType<F>,
           typename = Requires<Applicative<_F>::value>,
-          typename = Requires<SameTemplate<PlainType<Fn>, _F>::value>>
+          typename = Requires<SameTemplate<Fn, _F>::value>>
 auto operator*(Ff &&u, const F &v) {
-    return applicative<_F>::apply(std::forward<Ff>(u), v);
+    return applicative<_F>::ap(std::forward<Ff>(u), v);
 }
 };
 
