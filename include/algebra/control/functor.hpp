@@ -23,9 +23,6 @@ namespace algebra {
 
 template <typename F>
 struct functor {
-    // Just a generic class.
-    static constexpr bool instance = false;
-
     using T = ValueType<F>;
 
     template <typename U>
@@ -35,11 +32,17 @@ struct functor {
      * Minimal complete definition.
      */
 
+    // Map a function to the inner value in a functor.
+    // In Haskell:
+    //      fmap :: (a -> b) -> f a -> f b
     template <typename Fn, typename U = ResultOf<Fn(T)>>
     static _F<U> fmap(Fn&& fn, const _F<T>& f);
 
     template <typename Fn, typename U = ResultOf<Fn(T)>>
     static _F<U> fmap(Fn&& fn, _F<T>&& f);
+
+    // Just a generic class.
+    static constexpr bool instance = false;
 };
 
 /**
@@ -49,61 +52,6 @@ template <typename F>
 struct Functor {
     static constexpr bool value = functor<F>::instance;
     constexpr operator bool() const noexcept { return value; }
-};
-
-/**
- * Default implementation for `fmap`.
- */
-
-template <typename F>
-struct default_fmap {
-    using T = ValueType<F>;
-
-    template <typename U>
-    using _F = Rebind<F, U>;
-
-    template <typename Fn, typename U = ResultOf<Fn(T)>>
-    static _F<U> fmap(Fn&& fn, const _F<T>& f) {
-        _F<U> result;
-        for (auto& e : f) {
-            result.emplace_back(fn(e));
-        }
-        return result;
-    }
-
-    template <typename Fn, typename U = ResultOf<Fn(T)>,
-              typename = Requires<!std::is_same<U, T>::value ||
-                                  (!std::is_copy_assignable<T>::value &&
-                                   !std::is_move_assignable<T>::value)>>
-    static _F<U> fmap(Fn&& fn, _F<T>&& f) {
-        _F<U> result;
-        for (auto& e : f) {
-            result.emplace_back(fn(std::move(e)));
-        }
-        return result;
-    }
-
-    // In-place fmap.
-    template <typename Fn, typename U = ResultOf<Fn(T)>,
-              typename = Requires<std::is_same<U, T>::value &&
-                                  (std::is_copy_assignable<T>::value ||
-                                   std::is_move_assignable<T>::value)>>
-    static _F<T> fmap(Fn&& fn, _F<T>&& f) {
-        // for (auto& e : f) {
-        //     e = fn(std::move(e));
-        // }
-        std::transform(std::begin(f), std::end(f), std::begin(f), fn);
-        return f;
-    }
-};
-
-/**
- * Default functor with default `fmap`.
- */
-
-template <typename F>
-struct default_functor : default_fmap<F> {
-    static constexpr bool instance = true;
 };
 
 /**
@@ -117,7 +65,9 @@ struct default_functor : default_fmap<F> {
 //  auto res = fn % l; // equalize to `fmap(fn, l)`
 
 // For use ordinary function and lambda expression as `Fn`.
-template <typename F, typename Fn, typename _F = PlainType<F>>
+template <typename Fn, typename F, typename _F = PlainType<F>,
+          typename = Requires<Functor<_F>::value &&
+                              !std::is_member_function_pointer<Fn>::value>>
 auto operator%(Fn&& fn, F&& f)
         -> decltype(functor<_F>::fmap(std::forward<Fn>(fn),
                                       std::forward<F>(f))) {
@@ -126,7 +76,7 @@ auto operator%(Fn&& fn, F&& f)
 
 // For use member function pointer as `Fn`.
 template <typename R, typename Fn, typename F, typename _F = PlainType<F>,
-          typename = Requires<Functor<_F>() &&
+          typename = Requires<Functor<_F>::value &&
                               !std::is_member_function_pointer<Fn>::value>>
 auto operator%(R (Fn::*fn)(), F&& f)
         -> decltype(functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f))) {
@@ -135,7 +85,7 @@ auto operator%(R (Fn::*fn)(), F&& f)
 
 // For use transformed lambda expression as `Fn`.
 template <typename R, typename Fn, typename F, typename _F = PlainType<F>,
-          typename = Requires<Functor<_F>() &&
+          typename = Requires<Functor<_F>::value &&
                               !std::is_member_function_pointer<Fn>::value>>
 auto operator%(R (Fn::*fn)() const, F&& f)
         -> decltype(functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f))) {
