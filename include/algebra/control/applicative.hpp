@@ -97,8 +97,10 @@ struct Applicative {
 //
 // The type `F` must be the type with either a suitable unary constructor, or a
 // constructor taking an initialiser list.
-template <typename F,
-          typename = Requires<std::is_constructible<F, ValueType<F>>::value>>
+template <typename F
+          // TODO why this constrain can't hold on ?
+          //, typename = Requires<std::is_constructible<F, ValueType<F>>::value>
+          >
 struct default_pure {
     using T = ValueType<F>;
 
