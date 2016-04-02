@@ -41,9 +41,9 @@ struct applicative {
     // Encapsulate a value into an applicative context.
     // In Haksell:
     //      pure :: applicative f => a -> f a
-    static _F<T> pure(const T &x);
+    static constexpr _F<T> pure(const T &x) { return monad<F>::pure(x); }
 
-    static _F<T> pure(T &&x);
+    static constexpr _F<T> pure(T &&x) { return monad<F>::pure(std::move(x)); }
 
     // Apply Contextaulised function to applicative functor.
     template <typename Ff, typename Fn = ValueType<PlainType<Ff>>,
@@ -76,7 +76,7 @@ struct applicative {
     }
 
     // Just a generic class.
-    static constexpr bool instance = false;
+    static constexpr bool instance = monad<F>::instance;
 };
 
 /**
