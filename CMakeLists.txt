@@ -35,6 +35,7 @@ add_executable(hello-algebra
     demo/monoid-demo.cxx
     demo/string-demo.cxx
     demo/list-demo.cxx
+    demo/functor-applicative-monad-demo.cxx
 )
 
 ## Unit tests.

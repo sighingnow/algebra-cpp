@@ -7,6 +7,7 @@
 
 #include "../basic/type_concepts.hpp"
 #include "../basic/type_operation.hpp"
+#include "../control/applicative.hpp"
 #include "../prelude.hpp"
 
 namespace algebra {
@@ -20,9 +21,6 @@ namespace algebra {
  */
 template <typename M>
 struct monad {
-    // Just a generic type class, not monad instance.
-    static constexpr bool instance = false;
-
     // Provide type signatures for this specialised monad.
     template <typename U>
     using _M = Rebind<M, U>;
@@ -34,9 +32,6 @@ struct monad {
      * Minimal complete definition.
      */
 
-    // pure: monad m => a -> m a.
-    static _M<T> pure(const T &);
-
     // bind: monad m => m a -> (a -> m b) -> m b.
     template <typename F, typename U = ValueType<ResultOf<F(T)>>>
     static _M<U> bind(const _M<T> &m, F &&f);
@@ -44,6 +39,9 @@ struct monad {
     /**
      * Other useful methods.
      */
+
+    // pure: monad m => a -> m a.
+    static _M<T> pure(const T &);
 
     // join: monad m => m (m a) => m a.
     static _M<T> join(const _M<_M<T>> &m);
@@ -55,6 +53,9 @@ struct monad {
     // liftM: monad m => (a -> b) -> m a -> m b.
     template <typename F, typename U = ResultOf<F(T)>>
     static _M<U> liftM(F &&fn, const _M<T> &m);
+
+    // Just a generic type class, not monad instance.
+    static constexpr bool instance = false;
 };
 
 /**
@@ -70,19 +71,7 @@ struct Monad {
  * Default definition for `pure`, `bind`, `map` and `join`.
  */
 
-// pure: monad m => a -> m a.
-template <typename M>
-struct default_pure {
-    using T = ValueType<M>;
-    static constexpr M pure(const T &t) noexcept(
-            std::is_nothrow_constructible<M, const T &>::value) {
-        return M{t};
-    }
-    static constexpr M pure(T &&t) noexcept(
-            std::is_nothrow_constructible<M, T &&>::value) {
-        return M{std::move(t)};
-    }
-};
+// `default_pure` is already defined in `../control/applicative.hpp`.
 
 // bind: monad m => m a -> (a -> m b) -> m b.
 template <typename M>
@@ -103,9 +92,13 @@ struct default_bind {
     }
 };
 
-// join: monad m => m (m a) => m a.
 // In haskell:
-//      join x =  x >>= id
+//      join: monad m => m (m a) => m a.
+//      join x = x >>= id
+//
+// The function `join` is used to remove one level of monadic structure. Here, I
+// make the type of `join` as `monad m => m a -> a` rather than the origin type
+// signature in Haskell.
 template <typename M>
 struct default_join {
     using T = ValueType<M>;

@@ -2,7 +2,7 @@
  * The MIT License(MIT). Copyright (c) 2016 He Tao
  */
 
-#include <algebra/data/functor.hpp>
+#include <algebra/control/functor.hpp>
 #include <algebra/data/list.hpp>
 #include <functional>
 #include <iostream>

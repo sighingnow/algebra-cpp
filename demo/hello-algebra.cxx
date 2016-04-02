@@ -8,6 +8,7 @@
 void monoid_demo();
 void string_demo();
 void list_demo();
+void functor_applicative_monad_demo();
 
 int main() {
     std::cout << "Hello algebra !" << std::endl;
@@ -15,6 +16,7 @@ int main() {
     monoid_demo();
     string_demo();
     list_demo();
+    functor_applicative_monad_demo();
 
     return 0;
 }
