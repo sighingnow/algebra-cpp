@@ -94,6 +94,39 @@ struct VirtualDestructor {
 };
 
 /**
+ * Check if a type is the base template of another parametrised type.
+ *
+ * e.g.:
+ *      BaseTemplate<std::vector<int>, std::vector> = true
+ *      BaseTemplate<std::vector<int>, std::map> = false
+ */
+template <typename T, template <typename...> class U>
+struct BaseTemplate {
+    static constexpr bool value = false;
+};
+
+template <template <typename...> class U, typename... Ts>
+struct BaseTemplate<U<Ts...>, U> {
+    static constexpr bool value = true;
+};
+
+/**
+ * Check if two parametrised types are have the same base template.
+ *
+ * e.g.:
+ *      SameTemplate<std::vector<int>, std::vector<float>> = true
+ *      SameTemplate<std::vector<int>, std::list<int>> = false
+ */
+template <typename T, typename U>
+struct SameTemplate;
+
+template <template <typename...> class T, template <typename...> class U,
+          typename... Ts, typename... Us>
+struct SameTemplate<T<Ts...>, U<Us...>> {
+    static constexpr bool value = std::is_same<T<Ts...>, U<Us...>>::value;
+};
+
+/**
  * Custom type concepts checker.
  */
 template <bool Pred>
