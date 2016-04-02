@@ -2,7 +2,7 @@
  * The MIT License(MIT). Copyright (c) 2016 He Tao
  */
 
-#include <algebra/data/string.hpp>
+#include <algebra/data/stl.hpp>
 #include <functional>
 #include <iostream>
 
