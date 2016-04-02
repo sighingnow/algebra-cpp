@@ -48,22 +48,20 @@ go_bandit([]() {
                        Equals(std::list<int>{1, 2, 3, 4}));
         });
 
-        // TODO how to rebind allocator ?
+        bandit::it("functor::fmap(a->b, &)", [&]() {
+            using algebra::operator%;
+            auto f = [](int x) { return float(x) + 0.5f; };
+            auto l = std::list<int>{1, 2, 3, 4};
+            auto r = f % l;
+            AssertThat(r, Equals(std::list<float>{1.5f, 2.5f, 3.5f, 4.5f}));
+        });
 
-        // bandit::it("functor::fmap(a->b, &)", [&]() {
-        //     using algebra::operator%;
-        //     auto f = [](int x) { return float(x) + 0.5f; };
-        //     auto l = std::list<int>{1, 2, 3, 4};
-        //     auto r = f % l;
-        //     AssertThat(r, Equals(std::list<float>{1.5f, 2.5f, 3.5f, 4.5f}));
-        // });
-
-        // bandit::it("functor::fmap(a->b, &&)", [&]() {
-        //     using algebra::operator%;
-        //     auto f = [](int x) { return float(x) + 0.5f; };
-        //     auto r = f % std::list<int>{1, 2, 3, 4};
-        //     AssertThat(r, Equals(std::list<float>{1.5f, 2.5f, 3.5f, 4.5f}));
-        // });
+        bandit::it("functor::fmap(a->b, &&)", [&]() {
+            using algebra::operator%;
+            auto f = [](int x) { return float(x) + 0.5f; };
+            auto r = f % std::list<int>{1, 2, 3, 4};
+            AssertThat(r, Equals(std::list<float>{1.5f, 2.5f, 3.5f, 4.5f}));
+        });
 
         bandit::it("functor::fmap(a->a, &&)", [&]() {
             using algebra::operator%;

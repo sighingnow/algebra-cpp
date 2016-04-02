@@ -7,6 +7,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 #include "../control/functor.hpp"
 #include "../control/monad.hpp"
 #include "../data/monoid.hpp"
@@ -19,8 +20,24 @@ namespace algebra {
 /**
  * Tag used for STL containers.
  */
-template <typename T>
+template <typename...>
 struct stl_container {};
+
+// Specialize `Rebind` for Value-Allocator containers: generic collection with
+// type `C <T, Allocator>`.
+template <template <typename, typename> class C, typename T, typename A>
+struct parametric_type_traits<C<T, A>> {
+   private:
+    template <typename U>
+    using rebind_allocator =
+            typename std::allocator_traits<A>::template rebind_alloc<U>;
+
+   public:
+    using value_type = T;
+
+    template <typename U>
+    using rebind = C<U, rebind_allocator<U>>;
+};
 
 /**
  * STL containers as monoid.
@@ -63,11 +80,14 @@ struct functor<stl_container<F>> {
     template <typename U>
     using _F = Rebind<F, U>;
 
-    template <typename Fn, typename U = ResultOf<Fn(T)>>
+    template <typename Fn, typename U = ResultOf<Fn(T)>,
+              typename = Requires<!std::is_same<U, T>::value ||
+                                  (!std::is_copy_assignable<T>::value &&
+                                   !std::is_move_assignable<T>::value)>>
     static _F<U> fmap(Fn&& fn, const _F<T>& container) {
         _F<U> result;
         for (auto& e : container) {
-            result.emplace_back(fn(e));
+            result.emplace_back(fn(std::move(e)));
         }
         return result;
     }
@@ -84,7 +104,7 @@ struct functor<stl_container<F>> {
         return result;
     }
 
-    // In-place fmap.
+    // In place fmap.
     template <typename Fn, typename U = ResultOf<Fn(T)>,
               typename = Requires<std::is_same<U, T>::value &&
                                   (std::is_copy_assignable<T>::value ||
@@ -142,15 +162,24 @@ struct monad<stl_container<M>> : default_monad<M> {
  * For `std::list`.
  */
 
-template <typename T, typename... Ts>
-struct monoid<std::list<T, Ts...>>
-        : monoid<stl_container<std::list<T, Ts...>>> {};
-template <typename T, typename... Ts>
-struct functor<std::list<T, Ts...>>
-        : functor<stl_container<std::list<T, Ts...>>> {};
-template <typename T, typename... Ts>
-struct monad<std::list<T, Ts...>> : monad<stl_container<std::list<T, Ts...>>> {
+template <typename T, typename A>
+struct monoid<std::list<T, A>> : monoid<stl_container<std::list<T, A>>> {};
+template <typename T, typename A>
+struct functor<std::list<T, A>> : functor<stl_container<std::list<T, A>>> {};
+template <typename T, typename A>
+struct monad<std::list<T, A>> : monad<stl_container<std::list<T, A>>> {};
+
+/**
+ * For `std::vector`.
+ */
+
+template <typename T, typename A>
+struct monoid<std::vector<T, A>> : monoid<stl_container<std::vector<T, A>>> {};
+template <typename T, typename A>
+struct functor<std::vector<T, A>> : functor<stl_container<std::vector<T, A>>> {
 };
+template <typename T, typename A>
+struct monad<std::vector<T, A>> : monad<stl_container<std::vector<T, A>>> {};
 
 /**
  * For `std::basic_string`
