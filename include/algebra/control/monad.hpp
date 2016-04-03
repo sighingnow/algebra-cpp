@@ -83,12 +83,12 @@ struct default_bind {
 
     template <typename F, typename U = ValueType<ResultOf<F(T)>>>
     static constexpr _M<U> bind(const _M<T> &m, F &&f) {
-        return monad<_M<U>>::join(monad<_M<T>>::map(std::forward<F>(f), m));
+        return monad<_M<U>>::join(monad<_M<T>>::liftM(std::forward<F>(f), m));
     }
     template <typename F, typename U = ValueType<ResultOf<F(T)>>>
     static constexpr _M<U> bind(_M<T> &&m, F &&f) {
         return monad<_M<U>>::join(
-                monad<_M<T>>::map(std::forward<F>(f), std::move(m)));
+                monad<_M<T>>::liftM(std::forward<F>(f), std::move(m)));
     }
 };
 
@@ -96,9 +96,7 @@ struct default_bind {
 //      join: monad m => m (m a) => m a.
 //      join x = x >>= id
 //
-// The function `join` is used to remove one level of monadic structure. Here, I
-// make the type of `join` as `monad m => m a -> a` rather than the origin type
-// signature in Haskell.
+// The function `join` is used to remove one level of monadic structure.
 template <typename M>
 struct default_join {
     using T = ValueType<M>;
