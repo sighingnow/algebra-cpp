@@ -140,6 +140,6 @@ struct monoid<prod_monoid<N>> {
         return a * b;
     }
 };
-}
+};
 
 #endif /* __ALGEBRA_DATA_MONOID_HPP__ */

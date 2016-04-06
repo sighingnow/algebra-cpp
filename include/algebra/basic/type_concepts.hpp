@@ -135,6 +135,87 @@ struct SameTemplate<T<Ts...>, U<Us...>> {
  */
 template <bool Pred>
 using Requires = typename std::enable_if<Pred>::type;
-}
+
+/**
+ * Test whether a type have some operators or functions using SFINAE.
+ */
+namespace _inner_impl {
+
+// Check `==`.
+template <typename T>
+auto test_eq(decltype(std::declval<T>() == std::declval<T>()) *)
+        -> decltype(std::declval<T>() == std::declval<T>());
+template <typename T>
+auto test_eq(...) -> void;
+
+// Check '<'.
+template <typename T>
+auto test_lt(decltype(std::declval<T>() < std::declval<T>()) *)
+        -> decltype(std::declval<T>() < std::declval<T>());
+template <typename T>
+auto test_lt(...) -> void;
+
+// Check '<='.
+template <typename T>
+auto test_le(decltype(std::declval<T>() <= std::declval<T>()) *)
+        -> decltype(std::declval<T>() <= std::declval<T>());
+template <typename T>
+auto test_le(...) -> void;
+
+// Check '>'.
+template <typename T>
+auto test_gt(decltype(std::declval<T>() > std::declval<T>()) *)
+        -> decltype(std::declval<T>() > std::declval<T>());
+template <typename T>
+auto test_gt(...) -> void;
+
+// Check '>='.
+template <typename T>
+auto test_ge(decltype(std::declval<T>() >= std::declval<T>()) *)
+        -> decltype(std::declval<T>() >= std::declval<T>());
+template <typename T>
+auto test_ge(...) -> void;
+};
+
+// Concepts for operator '=='.
+template <typename T>
+struct has_eq {
+    static constexpr bool value =
+            std::is_convertible<decltype(_inner_impl::test_eq<T>(nullptr)),
+                                bool>::value;
+};
+
+// Concepts for operator '<'.
+template <typename T>
+struct has_lt {
+    static constexpr bool value =
+            std::is_convertible<decltype(_inner_impl::test_lt<T>(nullptr)),
+                                bool>::value;
+};
+
+// Concepts for operator '<='.
+template <typename T>
+struct has_le {
+    static constexpr bool value =
+            std::is_convertible<decltype(_inner_impl::test_le<T>(nullptr)),
+                                bool>::value;
+};
+
+// Concepts for operator '>'.
+template <typename T>
+struct has_gt {
+    static constexpr bool value =
+            std::is_convertible<decltype(_inner_impl::test_gt<T>(nullptr)),
+                                bool>::value;
+};
+
+// Concepts for operator '>='.
+template <typename T>
+struct has_ge {
+    static constexpr bool value =
+            std::is_convertible<decltype(_inner_impl::test_ge<T>(nullptr)),
+                                bool>::value;
+};
+};
 
 #endif /* __ALGEBRA_BASIC_TYPE_CONCEPTS_HH__ */
