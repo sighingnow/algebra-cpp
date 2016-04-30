@@ -21,76 +21,75 @@
  */
 namespace algebra {
 
-template <typename F>
-struct functor {
-    using T = ValueType<F>;
+    template <typename F>
+    struct functor {
+        using T = ValueType<F>;
 
-    template <typename U>
-    using _F = Rebind<F, U>;
+        template <typename U>
+        using _F = Rebind<F, U>;
+
+        /**
+         * Minimal complete definition.
+         */
+
+        // Map a function to the inner value in a functor.
+        // In Haskell:
+        //      fmap :: (a -> b) -> f a -> f b
+        template <typename Fn, typename U = ResultOf<Fn(T)>>
+        static _F<U> fmap(Fn&& fn, const _F<T>& f);
+
+        template <typename Fn, typename U = ResultOf<Fn(T)>>
+        static _F<U> fmap(Fn&& fn, _F<T>&& f);
+
+        // Just a generic class.
+        static constexpr bool instance = false;
+    };
 
     /**
-     * Minimal complete definition.
+     * Functor type predication.
+     */
+    template <typename F>
+    struct Functor {
+        static constexpr bool value = functor<F>::instance;
+        constexpr operator bool() const noexcept { return value; }
+    };
+
+    /**
+     * Operator overloading for functor operation.
      */
 
-    // Map a function to the inner value in a functor.
-    // In Haskell:
-    //      fmap :: (a -> b) -> f a -> f b
-    template <typename Fn, typename U = ResultOf<Fn(T)>>
-    static _F<U> fmap(Fn&& fn, const _F<T>& f);
+    // Overload `%` as `fmap`.
+    // e.g.:
+    //  auto fn = [](int x) { return x + 1; };
+    //  std::vector<int> l = {1, 2, 3};
+    //  auto res = fn % l; // equalize to `fmap(fn, l)`
 
-    template <typename Fn, typename U = ResultOf<Fn(T)>>
-    static _F<U> fmap(Fn&& fn, _F<T>&& f);
+    // For use ordinary function and lambda expression as `Fn`.
+    template <
+            typename Fn, typename F, typename _F = PlainType<F>,
+            typename = Requires<Functor<_F>::value && !std::is_member_function_pointer<Fn>::value>>
+    auto operator%(Fn&& fn, F&& f)
+            -> decltype(functor<_F>::fmap(std::forward<Fn>(fn), std::forward<F>(f))) {
+        return functor<_F>::fmap(std::forward<Fn>(fn), std::forward<F>(f));
+    }
 
-    // Just a generic class.
-    static constexpr bool instance = false;
-};
+    // For use member function pointer as `Fn`.
+    template <
+            typename R, typename Fn, typename F, typename _F = PlainType<F>,
+            typename = Requires<Functor<_F>::value && !std::is_member_function_pointer<Fn>::value>>
+    auto operator%(R (Fn::*fn)(), F&& f)
+            -> decltype(functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f))) {
+        return functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f));
+    }
 
-/**
- * Functor type predication.
- */
-template <typename F>
-struct Functor {
-    static constexpr bool value = functor<F>::instance;
-    constexpr operator bool() const noexcept { return value; }
-};
-
-/**
- * Operator overloading for functor operation.
- */
-
-// Overload `%` as `fmap`.
-// e.g.:
-//  auto fn = [](int x) { return x + 1; };
-//  std::vector<int> l = {1, 2, 3};
-//  auto res = fn % l; // equalize to `fmap(fn, l)`
-
-// For use ordinary function and lambda expression as `Fn`.
-template <typename Fn, typename F, typename _F = PlainType<F>,
-          typename = Requires<Functor<_F>::value &&
-                              !std::is_member_function_pointer<Fn>::value>>
-auto operator%(Fn&& fn, F&& f)
-        -> decltype(functor<_F>::fmap(std::forward<Fn>(fn),
-                                      std::forward<F>(f))) {
-    return functor<_F>::fmap(std::forward<Fn>(fn), std::forward<F>(f));
-}
-
-// For use member function pointer as `Fn`.
-template <typename R, typename Fn, typename F, typename _F = PlainType<F>,
-          typename = Requires<Functor<_F>::value &&
-                              !std::is_member_function_pointer<Fn>::value>>
-auto operator%(R (Fn::*fn)(), F&& f)
-        -> decltype(functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f))) {
-    return functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f));
-}
-
-// For use transformed lambda expression as `Fn`.
-template <typename R, typename Fn, typename F, typename _F = PlainType<F>,
-          typename = Requires<Functor<_F>::value &&
-                              !std::is_member_function_pointer<Fn>::value>>
-auto operator%(R (Fn::*fn)() const, F&& f)
-        -> decltype(functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f))) {
-    return functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f));
-}
+    // For use transformed lambda expression as `Fn`.
+    template <
+            typename R, typename Fn, typename F, typename _F = PlainType<F>,
+            typename = Requires<Functor<_F>::value && !std::is_member_function_pointer<Fn>::value>>
+    auto operator%(R (Fn::*fn)() const, F&& f)
+            -> decltype(functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f))) {
+        return functor<_F>::fmap(std::mem_fn(fn), std::forward<F>(f));
+    }
 };
 
 #endif /* __ALGEBRA_H_DATA_FUNCTOR_HH__ */
